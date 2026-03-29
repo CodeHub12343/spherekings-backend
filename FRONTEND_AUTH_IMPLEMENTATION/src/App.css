@@ -1,0 +1,52 @@
+/* App-specific styles */
+
+/* Smooth transitions for all interactive elements */
+a, button {
+  transition: all 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f9fafb;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Focus styles for accessibility */
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid #5b4dff;
+  outline-offset: 2px;
+}
+
+/* Selection color */
+::selection {
+  background: rgba(91, 77, 255, 0.2);
+  color: #0f172a;
+}
+
+/* Image loading placeholder */
+img {
+  background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%);
+}
+
+/* Prevent text selection on interactive elements */
+.no-select {
+  user-select: none;
+}
+
+/* Hardware acceleration for animations */
+.will-animate {
+  will-change: transform, opacity;
+}
