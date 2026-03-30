@@ -12,6 +12,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/a
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
+  withCredentials: true, // 🔓 CRITICAL: Enable cookie handling for affiliate tracking
 });
 
 // Add Bearer token to authenticated requests

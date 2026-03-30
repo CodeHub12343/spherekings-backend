@@ -425,16 +425,19 @@ class AffiliateController {
       });
 
       // Set SINGLE affiliate_ref cookie (NOT httpOnly so frontend can read!)
+      // CRITICAL: For cross-origin cookies, must use SameSite: 'None' and secure: true
       res.cookie('affiliate_ref', JSON.stringify(affiliateRefData), {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         httpOnly: false, // 🔓 CRITICAL: Must be false so frontend JS can read it
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Lax',
+        secure: true, // 🔒 REQUIRED for SameSite: 'None' (cross-origin cookies)
+        sameSite: 'None', // 🌐 CRITICAL: Allows cross-origin cookie setting (Vercel ↔ Render)
         path: '/',
       });
 
       console.log('✅ [COOKIE SET] affiliate_ref cookie created successfully');
       console.log('📌 [COOKIE INFO] Frontend will be able to read this cookie during checkout');
+      console.log('🔐 [COOKIE CONFIG] Settings: { httpOnly: false, sameSite: "None", secure: true, path: "/" }');
+      console.log('   → This allows cross-origin requests from frontend to backend');
       console.log('═══════════════════════════════════════════════════════════\n');
 
       console.log(`🎯 [TRACKING/CLICK] Referral tracked successfully for: ${ref}`);
