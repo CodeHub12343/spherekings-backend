@@ -159,7 +159,7 @@ class CheckoutService {
       }
 
       // Step 4: Create Stripe checkout session
-      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+      const frontendUrl = process.env.FRONTEND_URL || 'https://spherekings-frontend.vercel.app';
       const sessionConfig = {
         payment_method_types: ['card'],
         mode: 'payment',

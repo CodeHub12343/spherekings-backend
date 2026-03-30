@@ -11,7 +11,7 @@
 
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import styled from 'styled-components';
 import { useCheckout } from '@/hooks/useCheckout';
@@ -117,7 +117,7 @@ const SummarySection = styled.div`
  * Displays after user returns from Stripe Checkout
  * Verifies payment and shows confirmation
  */
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessPageInner() {
   const searchParams = useSearchParams();
   const { handleSuccessRedirect, order, loading, error } = useCheckout();
   const cartItems = useCartStore((state) => state.items);
@@ -350,4 +350,12 @@ export default function CheckoutSuccessPage() {
   }
 
   return null;
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={null}>
+      <CheckoutSuccessPageInner />
+    </Suspense>
+  );
 }

@@ -9,6 +9,7 @@
  */
 
 import client from '@/api/client';
+import referralService from '@/api/services/referralService';
 
 /**
  * Create a Stripe checkout session from user's cart
@@ -27,26 +28,87 @@ import client from '@/api/client';
  */
 export async function createCheckoutSession(options = {}) {
   try {
-    const { affiliateId, metadata, shippingAddress } = options;
+    let { affiliateId, visitorId, metadata, shippingAddress } = options;
     
-    console.log('🛒 Creating checkout session...');
-    console.log('📦 Shipping address:', shippingAddress);
-    console.log('📦 Shipping address type:', typeof shippingAddress);
-    console.log('📦 Shipping address is null:', shippingAddress === null);
-    console.log('📦 Shipping address is undefined:', shippingAddress === undefined);
+    console.log('\n╔════════════════════════════════════════════════════════╗');
+    console.log('║    🔗 AFFILIATE ATTRIBUTION CHECKOUT FLOW              ║');
+    console.log('╚════════════════════════════════════════════════════════╝');
     
+    console.log('📊 [CHECKOUT INIT] Options received:', {
+      hasExplicitAffiliateId: !!affiliateId,
+      hasVisitorId: !!visitorId,
+      hasMetadata: !!metadata,
+      hasShippingAddress: !!shippingAddress,
+      optionsKeys: Object.keys(options),
+    });
+    
+    // 🔗 CRITICAL: Read affiliate data from cookie if not explicitly passed
+    if (!affiliateId) {
+      console.log('\n🔍 [COOKIE CHECK] affiliateId not explicitly passed. Reading from browser cookie...');
+      const referralCookie = referralService.getReferralCookie();
+      
+      if (referralCookie) {
+        affiliateId = referralCookie.affiliateId;
+        visitorId = referralCookie.visitorId;
+        console.log('✅ [COOKIE SUCCESS] Affiliate data extracted from affiliate_ref cookie:', {
+          affiliateId: affiliateId ? `✓ ${affiliateId.substring(0, 12)}...` : '✗ undefined',
+          visitorId: visitorId ? `✓ ${visitorId.substring(0, 12)}...` : '✗ undefined',
+          timestamp: referralCookie.timestamp ? new Date(referralCookie.timestamp).toISOString() : 'unknown',
+         source: 'browser cookie (affiliateRef)',
+        });
+      } else {
+        console.log('⚠️  [COOKIE FAIL] No affiliate_ref cookie found!');
+        console.log('📌 Debugging: Checking document.cookie directly...');
+        try {
+          const allCookies = document.cookie;
+          console.log('   Document.cookie value:', allCookies.substring(0, 100) + '...');
+          const cookieList = allCookies.split(';').map(c => c.trim().split('=')[0]);
+          console.log('   Available cookies:', cookieList.join(', '));
+        } catch (e) {
+          console.log('   Error accessing document.cookie:', e.message);
+        }
+        console.log('⚠️  [CHECKOUT] Proceeding WITHOUT affiliate attribution (will be regular customer order)');
+      }
+    } else {
+      console.log('✅ [EXPLICIT AFFILIATE] Using explicitly passed affiliateId:', affiliateId.substring(0, 12) + '...');
+    }
+    
+    console.log('\n🛒 Creating Stripe checkout session...');
+    console.log('📦 Shipping address provided:', !!shippingAddress);
+    if (shippingAddress) {
+      console.log('   Address detail:', {
+        street: shippingAddress.street ? '✓' : '✗',
+        city: shippingAddress.city ? '✓' : '✗',
+        state: shippingAddress.state ? '✓' : '✗',
+        zip: shippingAddress.postalCode ? '✓' : '✗',
+        country: shippingAddress.country ? '✓' : '✗',
+      });
+    }
+    
+    // IMPORTANT: Include affiliateId in BOTH query params and request body for robustness
     const config = {
       ...(affiliateId && { params: { affiliateId } }),
     };
     
     const body = {
       ...(metadata && { metadata }),
+      ...(visitorId && { visitorId }),
+      ...(affiliateId && { affiliateId }),  // CRITICAL: Include in body too!
       ...(shippingAddress && { shippingAddress }),
     };
 
-    console.log('📨 Request body:', body);
-    console.log('📨 Body keys:', Object.keys(body));
-    console.log('📨 Body has shippingAddress:', 'shippingAddress' in body);
+    console.log('\n📨 [REQUEST BUILT] Sending to backend:', {
+      endpoint: '/checkout/create-session',
+      method: 'POST',
+      queryParams: { affiliateId: affiliateId ? '✓ included' : '✗ missing' },
+      bodyParams: {
+        affiliateId: affiliateId ? `✓ ${affiliateId.substring(0, 12)}...` : '✗ MISSING',
+        visitorId: visitorId ? '✓ included' : '✗ missing',
+        shippingAddress: shippingAddress ? '✓ included' : '✗ missing',
+        metadata: metadata ? '✓ included' : '✗ missing',
+      },
+      bodyKeysCount: Object.keys(body).length,
+    });
     
     const response = await client.post(
       '/checkout/create-session',
@@ -58,10 +120,12 @@ export async function createCheckoutSession(options = {}) {
       throw new Error(response.data.message || 'Failed to create checkout session');
     }
     
-    console.log('✅ Checkout session created:', {
-      sessionId: response.data.data.sessionId,
-      url: response.data.data.url,
+    console.log('\n✅ [SUCCESS] Stripe checkout session created!', {
+      sessionId: response.data.data.sessionId.substring(0, 15) + '...',
+      affiliateAttribution: affiliateId ? `✅ ATTACHED (${affiliateId.substring(0, 12)}...)` : '⚠️  NONE',
+      status: 'ready for Stripe redirect',
     });
+    console.log('═══════════════════════════════════════════════════════\n');
     
     return response.data.data;
   } catch (error) {

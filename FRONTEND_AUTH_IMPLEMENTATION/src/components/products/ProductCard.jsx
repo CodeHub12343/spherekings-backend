@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Eye } from 'lucide-react';
+import { ShoppingCart, Heart, Eye } from 'lucide-react';
 
 const CardContainer = styled(motion.div)`
   background: white;
@@ -83,10 +83,10 @@ const ActionButtons = styled.div`
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
-  padding: 24px 12px 12px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  padding: 20px 12px 12px;
   display: flex;
-  gap: 10px;
+  gap: 8px;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.3s ease;
@@ -99,10 +99,10 @@ const ActionButtons = styled.div`
 
 const ActionButton = styled.button`
   flex: 1;
-  background: ${(props) => (props.variant === 'primary' ? '#5b4dff' : 'rgba(255,255,255,0.15)')};
+  background: ${(props) => (props.variant === 'primary' ? '#5b4dff' : 'rgba(255,255,255,0.2)')};
   color: white;
   border: none;
-  padding: 10px 16px;
+  padding: 8px 12px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -112,11 +112,9 @@ const ActionButton = styled.button`
   justify-content: center;
   gap: 6px;
   transition: all 0.2s;
-  backdrop-filter: blur(4px);
 
   &:hover {
-    background: ${(props) => (props.variant === 'primary' ? '#4c3fcc' : 'rgba(255,255,255,0.25)')};
-    transform: translateY(-2px);
+    background: ${(props) => (props.variant === 'primary' ? '#4c3fcc' : 'rgba(255,255,255,0.3)')};
   }
 
   svg {
@@ -127,50 +125,52 @@ const ActionButton = styled.button`
 
 const ContentContainer = styled.div`
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
 `;
 
 const Category = styled.p`
-  font-size: 11px;
+  font-size: 12px;
   color: #9ca3af;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin: 0 0 8px;
-  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin: 0 0 6px;
 `;
 
 const ProductName = styled(Link)`
   display: block;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   color: #1f2937;
-  margin: 0 0 8px;
+  margin: 8px 0;
   text-decoration: none;
-  line-height: 1.3;
-  transition: color 0.2s;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  line-height: 1.4;
 
   &:hover {
     color: #5b4dff;
   }
 `;
 
+const Description = styled.p`
+  font-size: 13px;
+  color: #6b7280;
+  margin: 8px 0;
+  min-height: 36px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+`;
+
 const PriceContainer = styled.div`
   display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin: 14px 0;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
 `;
 
 const Price = styled.span`
-  font-size: 22px;
-  font-weight: 800;
+  font-size: 20px;
+  font-weight: 700;
   color: #1f2937;
 `;
 
@@ -180,46 +180,55 @@ const OriginalPrice = styled.span`
   text-decoration: line-through;
 `;
 
-const FooterSection = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 10px;
-  margin-top: 12px;
-`;
-
 const StockInfo = styled.p`
   font-size: 12px;
   color: ${(props) => (props.lowStock ? '#ef4444' : '#6b7280')};
   font-weight: ${(props) => (props.lowStock ? 600 : 400)};
   margin: 0;
-  flex: 1;
+`;
+
+const VariantsContainer = styled.div`
+  display: flex;
+  gap: 6px;
+  margin: 8px 0;
+  flex-wrap: wrap;
+`;
+
+const VariantChip = styled.span`
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #6b7280;
 `;
 
 /**
- * ProductCard Component - Modern E-commerce Design
- * Clean, minimal product card with essential information
+ * ProductCard Component
+ * Reusable card component for displaying product information
  * @param {Object} props - Component props
  * @param {Object} props.product - Product data
  * @param {boolean} props.showActions - Show action buttons
  * @param {Function} props.onAddToCart - Add to cart callback
+ * @param {Function} props.onWishlist - Wishlist callback
  */
 const ProductCard = ({
   product,
   showActions = true,
   onAddToCart,
+  onWishlist,
   ...rest
 }) => {
   const {
     _id,
     name,
+    description,
     price,
     images,
     stock,
     status,
     category,
     isFeatured,
+    variants,
   } = product;
 
   const isOutOfStock = status === 'out_of_stock' || stock === 0;
@@ -266,8 +275,11 @@ const ProductCard = ({
               title="Add to cart"
             >
               <ShoppingCart />
-              Add to Cart
+              Add
             </ActionButton>
+         {/*    <ActionButton onClick={onWishlist} title="Add to wishlist">
+              <Heart />
+            </ActionButton> */}
             <ActionButton
               as={Link}
               href={`/products/${_id}`}
@@ -275,7 +287,6 @@ const ProductCard = ({
               style={{ textDecoration: 'none' }}
             >
               <Eye />
-              View
             </ActionButton>
           </ActionButtons>
         )}
@@ -287,20 +298,33 @@ const ProductCard = ({
 
         <ProductName href={`/products/${_id}`}>{name}</ProductName>
 
-        {/* Price & Stock - Flexible spacing */}
-        <div style={{ marginTop: 'auto' }}>
-          <PriceContainer>
-            <Price>${price.toFixed(2)}</Price>
-          </PriceContainer>
+       {/*  {description && <Description>{description}</Description>} */}
 
-          <StockInfo lowStock={lowStock}>
-            {isOutOfStock
-              ? 'Out of stock'
-              : lowStock
-                ? `Only ${stock} left`
-                : `${stock} in stock`}
-          </StockInfo>
-        </div>
+        {/* Variants */}
+        {variants && variants.length > 0 && (
+          <VariantsContainer>
+            {variants.map((variant, idx) => (
+              <VariantChip key={idx}>
+                {variant.name}: {variant.options.slice(0, 2).join(', ')}
+                {variant.options.length > 2 ? '...' : ''}
+              </VariantChip>
+            ))}
+          </VariantsContainer>
+        )}
+
+        {/* Price */}
+        <PriceContainer>
+          <Price>${price.toFixed(2)}</Price>
+        </PriceContainer>
+
+        {/* Stock Info */}
+        <StockInfo lowStock={lowStock}>
+          {isOutOfStock
+            ? 'Out of stock'
+            : lowStock
+              ? `Only ${stock} left`
+              : `${stock} in stock`}
+        </StockInfo>
       </ContentContainer>
     </CardContainer>
   );

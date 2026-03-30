@@ -5,7 +5,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import styled from 'styled-components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useSponsorshipRecord } from '@/api/hooks/useSponsorship';
@@ -196,7 +196,7 @@ const LoadingContainer = styled.div`
   }
 `;
 
-export default function SponsorshipSuccessPage() {
+function SponsorshipSuccessPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const toast = useToast();
@@ -400,5 +400,13 @@ export default function SponsorshipSuccessPage() {
         </ButtonGroup>
       </SuccessCard>
     </PageContainer>
+  );
+}
+
+export default function SponsorshipSuccessPage() {
+  return (
+    <Suspense fallback={null}>
+      <SponsorshipSuccessPageInner />
+    </Suspense>
   );
 }

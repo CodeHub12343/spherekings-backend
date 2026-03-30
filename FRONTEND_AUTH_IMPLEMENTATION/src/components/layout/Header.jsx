@@ -1,5 +1,7 @@
 'use client';
 
+'use client';
+
 import { useState } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link';
@@ -303,9 +305,7 @@ const UserMenuIcon = styled.div`
   font-size: 14px;
 `;
 
-const ChevronIcon = styled(ChevronDown).withConfig({
-  shouldForwardProp: (prop) => prop !== 'isOpen',
-})`
+const ChevronIcon = styled(ChevronDown)`
   width: 16px;
   height: 16px;
   color: #6b7280;
@@ -559,7 +559,7 @@ export default function Header() {
     { label: 'Payouts', href: '/admin/payouts' },
     { label: 'Sponsorships', href: '/admin/sponsorship/records' },
     { label: 'Influencers', href: '/admin/influencer/applications' },
-    { label: 'Retail Locations', href: '/admin/retail-location' },
+    { label: 'Retail Locations', href: '/admin/retail-locations' },
     { label: 'Raffles', href: '/admin/raffle' },
   ];
 
@@ -703,6 +703,13 @@ export default function Header() {
             >
               Stores
             </MobileNavLink>
+             <MobileNavLink
+              href="/raffle/my-entries"
+              className={isActive('/raffle/my-entries') ? 'active' : ''}
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              My Entries
+            </MobileNavLink>
                </MobileMenuSection>                          
 
           {/* Sponsorship Section */}
@@ -835,16 +842,6 @@ export default function Header() {
                 >
                   Payouts
                 </CollapsibleNavLink>
-                <CollapsibleNavLink
-                  href="/affiliate/settings"
-                  className={isActive('/affiliate/settings') ? 'active' : ''}
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    setExpandedMobileSection(null);
-                  }}
-                >
-                  Settings
-                </CollapsibleNavLink>
               </CollapsibleSectionContent>
             </div>
           )}
@@ -869,16 +866,6 @@ export default function Header() {
                   }}
                 >
                   Dashboard
-                </CollapsibleNavLink>
-                <CollapsibleNavLink
-                  href="/admin/analytics"
-                  className={isActive('/admin/analytics') ? 'active' : ''}
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    setExpandedMobileSection(null);
-                  }}
-                >
-                  Analytics
                 </CollapsibleNavLink>
                 <CollapsibleNavLink
                   href="/admin/products"
@@ -941,7 +928,7 @@ export default function Header() {
                   Influencers
                 </CollapsibleNavLink>
                 <CollapsibleNavLink
-                  href="/admin/retail-location"
+                  href="/admin/retail-locations"
                   className={isActive('/admin/retail-location') ? 'active' : ''}
                   onClick={() => {
                     setIsMobileMenuOpen(false);
@@ -959,6 +946,16 @@ export default function Header() {
                   }}
                 >
                   Raffles
+                </CollapsibleNavLink>
+                <CollapsibleNavLink
+                  href="/admin/categories"
+                  className={isActive('/admin/categories') ? 'active' : ''}
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setExpandedMobileSection(null);
+                  }}
+                >
+                  Categories
                 </CollapsibleNavLink>
               </CollapsibleSectionContent>
             </div>

@@ -117,7 +117,6 @@ const MENU_ITEMS = [
   { label: 'Analytics', href: '/affiliate/analytics', icon: TrendingUp },
   { label: 'Commissions', href: '/affiliate/commissions', icon: DollarSign },
   { label: 'Payouts', href: '/affiliate/payouts', icon: PieChart },
-  { label: 'Settings', href: '/affiliate/settings', icon: Settings },
 ];
 
 export default function AffiliateSidebar() {

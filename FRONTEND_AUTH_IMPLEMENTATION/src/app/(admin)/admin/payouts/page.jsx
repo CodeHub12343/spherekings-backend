@@ -1,11 +1,11 @@
+'use client';
+
 /**
  * Admin Payouts Management Page
  * /admin/payouts
  *
  * Admin dashboard for viewing and managing all payouts
  */
-
-'use client';
 
 import React, { useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -209,7 +209,8 @@ const LoginLink = styled.div`
   }
 `;
 
-export default function RegisterPage() {
+
+function RegisterPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { register, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -439,5 +440,13 @@ export default function RegisterPage() {
         </FormContainer>
       </RightSection>
     </PageContainer>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterPageInner />
+    </Suspense>
   );
 }

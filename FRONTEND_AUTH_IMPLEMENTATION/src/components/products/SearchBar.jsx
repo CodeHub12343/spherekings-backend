@@ -1,5 +1,7 @@
 'use client';
 
+'use client';
+
 import { useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { Search, X } from 'lucide-react';

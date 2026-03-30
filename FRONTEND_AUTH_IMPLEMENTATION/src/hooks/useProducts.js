@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Product Hooks
  * React Query hooks for fetching and mutating product data

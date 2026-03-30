@@ -239,6 +239,7 @@ const ProductList = ({
   onPageChange = () => {},
   onFilterChange = () => {},
   onAddToCart = () => {},
+  onWishlist = () => {},
   showFilters = true,
   canAddToCart = true,
   categories = [],
@@ -431,6 +432,7 @@ const ProductList = ({
                 product={product}
                 showActions={canAddToCart}
                 onAddToCart={() => onAddToCart(product._id)}
+                onWishlist={() => onWishlist(product._id)}
               />
             ))}
           </GridLayout>

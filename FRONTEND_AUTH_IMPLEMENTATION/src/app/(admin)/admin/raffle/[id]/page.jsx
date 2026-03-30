@@ -1,4 +1,5 @@
 'use client';
+export const dynamic = 'force-dynamic';
 
 import styled from 'styled-components';
 import { useParams, useRouter } from 'next/navigation';
@@ -15,15 +16,9 @@ const Container = styled.div`
   max-width: 900px;
   margin: 0 auto;
   padding: 40px 20px;
-  width: 100%;
-  box-sizing: border-box;
 
   @media (max-width: 768px) {
     padding: 24px 16px;
-  }
-
-  @media (max-width: 480px) {
-    padding: 16px 12px;
   }
 `;
 
@@ -36,12 +31,6 @@ const Header = styled.div`
   @media (max-width: 768px) {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-
-  @media (max-width: 480px) {
-    margin-bottom: 20px;
   }
 `;
 
@@ -56,10 +45,7 @@ const BackButton = styled.button`
   font-size: 14px;
   font-weight: 600;
   transition: color 0.2s;
-  padding: 8px 0;
-  min-height: 40px;
-  min-width: 40px;
-  justify-content: flex-start;
+  padding: 0;
 
   &:hover {
     color: #4c3fd1;
@@ -68,19 +54,6 @@ const BackButton = styled.button`
   svg {
     width: 18px;
     height: 18px;
-    flex-shrink: 0;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 13px;
-    padding: 6px 0;
-    min-height: 36px;
-    min-width: 36px;
-
-    svg {
-      width: 16px;
-      height: 16px;
-    }
   }
 `;
 
@@ -89,14 +62,9 @@ const PageTitle = styled.h1`
   font-weight: 700;
   color: #1f2937;
   margin: 0;
-  line-height: 1.2;
 
   @media (max-width: 768px) {
     font-size: 22px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 18px;
   }
 `;
 
@@ -105,12 +73,6 @@ const StatusSection = styled.div`
   gap: 12px;
   align-items: center;
   margin-bottom: 24px;
-  flex-wrap: wrap;
-
-  @media (max-width: 480px) {
-    margin-bottom: 16px;
-    gap: 8px;
-  }
 `;
 
 const StatusBadge = styled.span`
@@ -131,17 +93,6 @@ const StatusBadge = styled.span`
     if (props.status === 'pending' || props.status === 'processing') return '#92400e';
     return '#4b5563';
   }};
-  white-space: nowrap;
-
-  @media (max-width: 480px) {
-    font-size: 11px;
-    padding: 6px 10px;
-
-    svg {
-      width: 12px;
-      height: 12px;
-    }
-  }
 `;
 
 const Card = styled.div`
@@ -150,18 +101,9 @@ const Card = styled.div`
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 24px;
-  width: 100%;
-  box-sizing: border-box;
 
   @media (max-width: 768px) {
-    padding: 20px;
-    margin-bottom: 20px;
-  }
-
-  @media (max-width: 480px) {
     padding: 16px;
-    margin-bottom: 16px;
-    border-radius: 8px;
   }
 `;
 
@@ -178,24 +120,6 @@ const CardTitle = styled.h2`
     width: 18px;
     height: 18px;
     color: #5b4dff;
-    flex-shrink: 0;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 14px;
-    margin-bottom: 16px;
-    gap: 8px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 13px;
-    margin-bottom: 12px;
-    gap: 6px;
-
-    svg {
-      width: 16px;
-      height: 16px;
-    }
   }
 `;
 
@@ -203,16 +127,6 @@ const InfoGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
-
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
 `;
 
 const InfoField = styled.div`
@@ -227,11 +141,6 @@ const InfoLabel = styled.label`
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 8px;
-
-  @media (max-width: 480px) {
-    font-size: 10px;
-    margin-bottom: 6px;
-  }
 `;
 
 const InfoValue = styled.div`
@@ -239,11 +148,6 @@ const InfoValue = styled.div`
   color: #1f2937;
   font-weight: 500;
   word-break: break-word;
-  line-height: 1.5;
-
-  @media (max-width: 480px) {
-    font-size: 13px;
-  }
 `;
 
 const AddressCard = styled.div`
@@ -252,12 +156,6 @@ const AddressCard = styled.div`
   border-radius: 8px;
   padding: 16px;
   margin-top: 12px;
-
-  @media (max-width: 480px) {
-    padding: 12px;
-    margin-top: 10px;
-    border-radius: 6px;
-  }
 `;
 
 const AddressText = styled.div`
@@ -265,19 +163,9 @@ const AddressText = styled.div`
   color: #1f2937;
   line-height: 1.6;
   font-weight: 500;
-  word-break: break-word;
 
   & + & {
     margin-top: 8px;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 13px;
-    line-height: 1.5;
-
-    & + & {
-      margin-top: 6px;
-    }
   }
 `;
 
@@ -288,14 +176,7 @@ const ActionButtons = styled.div`
   flex-wrap: wrap;
 
   @media (max-width: 768px) {
-    gap: 10px;
-    margin-top: 20px;
-  }
-
-  @media (max-width: 480px) {
     flex-direction: column;
-    gap: 8px;
-    margin-top: 16px;
 
     button {
       width: 100%;
@@ -306,7 +187,7 @@ const ActionButtons = styled.div`
 const MarkShippedButton = styled(Button)`
   background: #10b981;
   color: white;
-  padding: 12px 24px;
+  padding: 10px 20px;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
@@ -314,43 +195,20 @@ const MarkShippedButton = styled(Button)`
   border: none;
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  min-height: 44px;
-  font-size: 14px;
 
-  &:hover:not(:disabled) {
+  &:hover {
     background: #059669;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
   }
 
   &:disabled {
     background: #d1d5db;
     cursor: not-allowed;
-    opacity: 0.6;
   }
 
   svg {
     width: 16px;
     height: 16px;
-  }
-
-  @media (max-width: 768px) {
-    padding: 10px 20px;
-    font-size: 13px;
-    min-height: 40px;
-  }
-
-  @media (max-width: 480px) {
-    padding: 12px 16px;
-    font-size: 14px;
-    min-height: 44px;
-    width: 100%;
   }
 `;
 
@@ -360,12 +218,6 @@ const LoadingContainer = styled.div`
   align-items: center;
   min-height: 400px;
   color: #6b7280;
-  font-size: 16px;
-
-  @media (max-width: 480px) {
-    min-height: 300px;
-    font-size: 14px;
-  }
 `;
 
 const ErrorContainer = styled.div`
@@ -374,7 +226,7 @@ const ErrorContainer = styled.div`
   border-radius: 8px;
   padding: 20px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   color: #dc2626;
   margin-top: 20px;
@@ -383,19 +235,6 @@ const ErrorContainer = styled.div`
     width: 20px;
     height: 20px;
     flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  @media (max-width: 480px) {
-    padding: 16px;
-    margin-top: 16px;
-    border-radius: 6px;
-    font-size: 13px;
-
-    svg {
-      width: 18px;
-      height: 18px;
-    }
   }
 `;
 

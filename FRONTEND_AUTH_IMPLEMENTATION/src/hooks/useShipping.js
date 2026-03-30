@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * useShipping Hook
  * Custom React hook for managing shipping address form state and validation
@@ -107,7 +109,7 @@ export function useShipping() {
         }
       }
     },
-    [formData]
+    [formData, errors]
   );
 
   /**

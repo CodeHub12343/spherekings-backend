@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Commission Action Modals
  * Approval, Payment, and Reversal modals for admin operations

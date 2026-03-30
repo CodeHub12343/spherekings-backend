@@ -142,8 +142,9 @@ const ADMIN_MENU = [
       { label: 'Orders', href: '/admin/orders', icon: ShoppingCart },
       { label: 'Commissions', href: '/admin/commissions', icon: DollarSign },
       { label: 'Payouts', href: '/admin/payouts', icon: TrendingUp },
-      { label: 'Retail Locations', href: '/admin/retail-location', icon: Store },
+      { label: 'Retail Locations', href: '/admin/retail-locations', icon: Store },
       { label: 'Raffles', href: '/admin/raffle', icon: Gift },
+      { label: 'Categories', href: '/admin/categories', icon: FileText },
     ]
   },
   {

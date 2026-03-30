@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * PayoutTable Component
  * Displays paginated payout table with selection and actions

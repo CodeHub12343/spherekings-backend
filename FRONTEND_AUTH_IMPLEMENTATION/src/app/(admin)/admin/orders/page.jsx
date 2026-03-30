@@ -1,9 +1,9 @@
+'use client';
+
 /**
  * Admin Orders Dashboard Page
  * Complete order management interface for admins
  */
-
-'use client';
 
 import styled from 'styled-components';
 import { useEffect, useState, useRef } from 'react';

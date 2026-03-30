@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * useCategories Hook
  * Provides category data fetching and management

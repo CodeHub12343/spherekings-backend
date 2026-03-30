@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import styled from 'styled-components';
 import { X, AlertCircle, CheckCircle, Image as ImageIcon } from 'lucide-react';

@@ -1,11 +1,11 @@
+'use client';
+
 /**
  * Admin Pending Payouts Page
  * /admin/payouts/pending
  *
  * Approval queue - pending payouts awaiting admin review
  */
-
-'use client';
 
 import React, { useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';

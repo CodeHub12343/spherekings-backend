@@ -269,14 +269,7 @@ const RaffleEntryModal = ({ isOpen, onClose, cycle }) => {
     setError(null);
 
     const data = new FormData();
-    // Use the entryId from the formData (passed from P2PConfirmationPage)
-    const passedEntryId = formData.get('entryId');
-    if (passedEntryId) {
-      data.append('entryId', passedEntryId);
-    } else {
-      // Fallback to state if not in formData
-      data.append('entryId', entryId);
-    }
+    data.append('entryId', entryId);
 
     // Check if we have a file to upload
     const file = formData.get('proofOfPaymentFile');

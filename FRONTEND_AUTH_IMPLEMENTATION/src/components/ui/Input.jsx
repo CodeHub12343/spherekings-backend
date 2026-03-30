@@ -5,6 +5,8 @@
 
 'use client';
 
+'use client';
+
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Eye, EyeOff } from 'lucide-react';

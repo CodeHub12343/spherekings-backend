@@ -401,45 +401,76 @@ class AffiliateController {
       const trackingData = await affiliateService.recordReferralClick(ref, clickData);
       console.log(`✅ [TRACKING/CLICK] ReferralTracking record created:`, trackingData);
 
-      // Set cookie for attribution (90 days)
-      res.cookie('affiliateId', trackingData.affiliateId.toString(), {
-        maxAge: 90 * 24 * 60 * 60 * 1000, // 90 days
-        httpOnly: true,
+      // 🎯 CRITICAL: Set affiliate_ref cookie for frontend to read during checkout
+      console.log('\n╔═══════════════════════════════════════════════════════════╗');
+      console.log('║       SETTING affiliate_ref COOKIE FOR CHECKOUT             ║');
+      console.log('╚═══════════════════════════════════════════════════════════╝');
+      
+      // Generate unique visitor ID for tracking
+      const visitorId = `visitor_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+      
+      // Prepare affiliate_ref cookie data (in same format frontend expects)
+      const affiliateRefData = {
+        affiliateId: trackingData.affiliateId.toString(),
+        affiliateCode: trackingData.affiliateCode,
+        visitorId,
+        timestamp: new Date().toISOString(),
+      };
+      
+      console.log('📋 [COOKIE DATA] Creating affiliate_ref cookie with:', {
+        affiliateId: affiliateRefData.affiliateId.substring(0, 12) + '...',
+        affiliateCode: affiliateRefData.affiliateCode,
+        visitorId: visitorId.substring(0, 20) + '...',
+        timestamp: affiliateRefData.timestamp,
+      });
+
+      // Set SINGLE affiliate_ref cookie (NOT httpOnly so frontend can read!)
+      res.cookie('affiliate_ref', JSON.stringify(affiliateRefData), {
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        httpOnly: false, // 🔓 CRITICAL: Must be false so frontend JS can read it
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'Lax',
         path: '/',
       });
 
-      res.cookie('affiliateCode', trackingData.affiliateCode, {
-        maxAge: 90 * 24 * 60 * 60 * 1000,
-        httpOnly: false, // Can be accessed by client
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Lax',
-        path: '/',
-      });
+      console.log('✅ [COOKIE SET] affiliate_ref cookie created successfully');
+      console.log('📌 [COOKIE INFO] Frontend will be able to read this cookie during checkout');
+      console.log('═══════════════════════════════════════════════════════════\n');
 
       console.log(`🎯 [TRACKING/CLICK] Referral tracked successfully for: ${ref}`);
+      console.log(`✅ [SUCCESS] Affiliate attribution data ready for order checkout\n`);
+      
       return res.status(200).json({
         success: true,
         statusCode: 200,
         message: 'Referral tracked successfully',
-        data: trackingData,
+        data: {
+          ...trackingData,
+          visitorId,
+          cookieSet: true,
+          cookieName: 'affiliate_ref',
+        },
       });
     } catch (error) {
       // Log the error details
-      console.error(`❌ [TRACKING/CLICK] Error tracking referral:`, {
+      console.error(`\n❌ [TRACKING/CLICK] ERROR tracking referral:`, {
         message: error.message,
         code: error.code,
         statusCode: error.statusCode,
         status: error.status,
+        refCode: ref,
         stack: error.stack?.split('\n').slice(0, 3),
       });
+      
+      console.log('⚠️  [TRACKING/CLICK] Affiliate attribution may be incomplete');
+      console.log('📌 [NOTE] Still returning 200 to avoid blocking frontend\n');
       
       // Still return success to not block the request, but log the error
       res.status(200).json({
         success: false,
         message: `Referral tracking error: ${error.message}`,
         data: null,
+        error: 'AFFILIATE_TRACKING_ERROR',
       });
     }
   }

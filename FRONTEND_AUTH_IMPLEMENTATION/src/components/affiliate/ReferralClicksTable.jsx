@@ -3,6 +3,8 @@
  * Displays paginated referral click history
  */
 
+'use client';
+
 import { useState } from 'react';
 import styled from 'styled-components';
 import { ChevronLeft, ChevronRight, Filter } from 'lucide-react';

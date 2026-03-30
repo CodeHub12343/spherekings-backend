@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
@@ -97,7 +97,7 @@ const ErrorDetails = styled.div`
  * 
  * Example: /products?search=iPhone&category=Electronics&maxPrice=900&page=1
  */
-export default function ProductsPage() {
+function ProductsPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -345,7 +345,10 @@ export default function ProductsPage() {
     }
   };
 
-
+  const handleWishlist = async (productId) => {
+    // TODO: Implement wishlist functionality
+    console.log('📌 Wishlist feature coming soon:', productId);
+  };
 
   // Show loading state while hydrating (syncing search params from URL)
   if (!isHydrated) {
@@ -411,6 +414,7 @@ export default function ProductsPage() {
           onPageChange={handlePageChange}
           onFilterChange={handleFilterChange}
           onAddToCart={handleAddToCart}
+          onWishlist={handleWishlist}
           showFilters={true}
           canAddToCart={true}
           categories={formattedCategories}
@@ -420,5 +424,13 @@ export default function ProductsPage() {
         />
       </ContentContainer>
     </PageContainer>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={null}>
+      <ProductsPageInner />
+    </Suspense>
   );
 }

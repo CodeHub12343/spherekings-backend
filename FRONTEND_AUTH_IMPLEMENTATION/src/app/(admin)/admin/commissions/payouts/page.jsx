@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Admin Ready Payouts Page
  * /admin/commissions/payouts
@@ -7,8 +9,6 @@
  * - Batch payment interface
  * - Payment processing
  */
-
-'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import styled from 'styled-components';

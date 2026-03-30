@@ -1,6 +1,7 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
+import { Suspense } from 'react';
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { CheckCircle, AlertCircle, ArrowRight, Loader } from 'lucide-react';
@@ -275,4 +276,11 @@ const RaffleSuccess = () => {
   );
 };
 
-export default RaffleSuccess;
+
+export default function RaffleSuccessPage() {
+  return (
+    <Suspense fallback={null}>
+      <RaffleSuccess />
+    </Suspense>
+  );
+}

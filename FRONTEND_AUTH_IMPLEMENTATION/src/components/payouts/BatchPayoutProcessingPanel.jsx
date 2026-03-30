@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * BatchPayoutProcessingPanel Component
  * Interface for batch payout operations (approve/process)

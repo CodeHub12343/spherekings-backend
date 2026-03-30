@@ -3,6 +3,8 @@
  * Displays affiliate referral URL with copy-to-clipboard functionality
  */
 
+'use client';
+
 import { useState, useRef } from 'react';
 import styled from 'styled-components';
 import { Copy, Check } from 'lucide-react';

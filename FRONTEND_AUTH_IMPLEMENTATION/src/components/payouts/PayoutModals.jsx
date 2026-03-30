@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * PayoutModals Component
  * Admin modals for payout approval, processing, and rejection

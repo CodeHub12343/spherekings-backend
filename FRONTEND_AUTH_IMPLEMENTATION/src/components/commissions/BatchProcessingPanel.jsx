@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Batch Processing Component
  * Interface for batch approval and payment operations

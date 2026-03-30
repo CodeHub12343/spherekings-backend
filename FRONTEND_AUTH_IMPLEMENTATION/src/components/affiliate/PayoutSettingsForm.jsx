@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Payout Settings Form Component
  * Form for configuring affiliate payout method and details

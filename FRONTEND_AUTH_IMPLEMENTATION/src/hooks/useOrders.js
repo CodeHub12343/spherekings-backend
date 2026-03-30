@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Order Hooks
  * Custom React hooks for order management
@@ -97,7 +99,7 @@ export function useOrderDetails(orderId) {
   useEffect(() => {
     if (!orderId) return;
     store.fetchOrderDetails(orderId);
-  }, [orderId, store]); // store from useRef is stable
+  }, [orderId]);
 
   return {
     order: selectedOrder,

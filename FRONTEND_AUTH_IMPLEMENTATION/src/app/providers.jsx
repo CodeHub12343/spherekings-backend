@@ -6,7 +6,7 @@ import { ToastProvider } from '@/components/ui/Toast';
 import { ThemeProvider } from 'styled-components';
 import GlobalStyles from '@/styles/globals';
 import ReferralTracker from '@/components/affiliate/ReferralTracker';
-import { useMemo } from 'react';
+import { useMemo, Suspense } from 'react';
 
 const theme = {
   colors: {
@@ -61,7 +61,9 @@ export function Providers({ children }) {
         <GlobalStyles />
         <AuthProvider>
           <ToastProvider>
-            <ReferralTracker />
+            <Suspense fallback={null}>
+              <ReferralTracker />
+            </Suspense>
             {children}
           </ToastProvider>
         </AuthProvider>

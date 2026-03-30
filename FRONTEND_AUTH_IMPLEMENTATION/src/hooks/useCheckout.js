@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Checkout Custom Hooks
  * React hooks for checkout operations
@@ -218,20 +220,38 @@ export function useCheckoutErrors() {
  */
 export function useCheckoutAffiliateTracking() {
   const getAffiliateId = useCallback(() => {
-    // Try to get from cookie
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-      const [name, value] = cookie.trim().split('=');
-      if (name === 'affiliate_ref') {
-        try {
+    console.log('🔍 [CHECKOUT AFFILIATE] getAffiliateId() called - reading cookie...');
+    console.log('🔍 [CHECKOUT AFFILIATE] document.cookie exists:', !!document.cookie);
+    console.log('🔍 [CHECKOUT AFFILIATE] document.cookie value:', document.cookie);
+    
+    try {
+      // Try to get from cookie
+      const cookies = document.cookie.split(';');
+      console.log('🔍 [CHECKOUT AFFILIATE] Total cookies:', cookies.length);
+      
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i];
+        const [name, value] = cookie.trim().split('=');
+        console.log(`🔍 [CHECKOUT AFFILIATE] Cookie ${i}: name="${name}", hasValue=${!!value}`);
+        
+        if (name === 'affiliate_ref') {
+          console.log('✅ [CHECKOUT AFFILIATE] FOUND affiliate_ref cookie!');
+          console.log('✅ [CHECKOUT AFFILIATE] Raw value:', value?.substring(0, 50));
           const decoded = JSON.parse(decodeURIComponent(value));
+          console.log('✅ [CHECKOUT AFFILIATE] Decoded:', {
+            affiliateId: decoded.affiliateId ? '✓ Present' : '✗ Missing',
+            visitorId: decoded.visitorId ? '✓ Present' : '✗ Missing',
+            fullAffiliateId: decoded.affiliateId,
+          });
           return decoded.affiliateId;
-        } catch (e) {
-          return null;
         }
       }
+      console.warn('⚠️  [CHECKOUT AFFILIATE] No affiliate_ref cookie found after checking all cookies');
+      return null;
+    } catch (e) {
+      console.error('❌ [CHECKOUT AFFILIATE] Error parsing cookie:', e.message, e.stack);
+      return null;
     }
-    return null;
   }, []);
 
   const setAffiliateId = useCallback((affiliateId) => {

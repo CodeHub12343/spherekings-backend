@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Affiliate Hooks
  * Custom React hooks for affiliate operations

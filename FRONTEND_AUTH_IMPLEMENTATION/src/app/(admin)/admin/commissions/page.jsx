@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Admin Commission Management Page
  * /admin/commissions
@@ -8,8 +10,6 @@
  * - Approval, payment, and reversal actions
  * - Batch operations
  */
-
-'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
 import styled from 'styled-components';

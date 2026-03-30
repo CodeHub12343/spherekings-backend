@@ -59,6 +59,11 @@ export function useLeaderboard() {
     }
   }, []);
 
+  // Auto-fetch leaderboard on mount
+  useEffect(() => {
+    fetchLeaderboard();
+  }, [fetchLeaderboard]);
+
   return {
     leaderboard,
     stats,

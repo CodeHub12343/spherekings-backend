@@ -1,11 +1,11 @@
+'use client';
+
 /**
  * Admin Dashboard Main Page
  * /admin/dashboard
  * 
  * Overview of all platform metrics and key statistics
  */
-
-'use client';
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';

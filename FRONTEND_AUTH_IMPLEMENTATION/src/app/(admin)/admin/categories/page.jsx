@@ -1,4 +1,9 @@
+
+
 'use client';
+export const dynamic = 'force-dynamic';
+
+import { Suspense } from 'react';
 
 import styled from 'styled-components';
 import { useState } from 'react';
@@ -439,7 +444,9 @@ const CancelButton = styled(Button)`
  * Categories Management Page
  * Admin only - Manage product categories
  */
-export default function CategoriesPage() {
+
+function CategoriesPageContent() {
+  // All hooks that need Suspense wrapping go here
   const { success, error: showError } = useToast();
   const { data: categories = [], isLoading } = useCategories();
   const createCategory = useCreateCategory();
@@ -513,121 +520,130 @@ export default function CategoriesPage() {
   };
 
   return (
-    <PageContainer>
-      <PageHeader>
-        <Title>Categories Management</Title>
-        <Subtitle>Manage product categories for the marketplace</Subtitle>
-      </PageHeader>
+      <PageContainer>
+        <PageHeader>
+          <Title>Categories Management</Title>
+          <Subtitle>Manage product categories for the marketplace</Subtitle>
+        </PageHeader>
 
-      <ContentContainer>
-        <ButtonGroup>
-          <Button onClick={() => handleOpenModal()}>
-            <Plus size={18} />
-            Add Category
-          </Button>
-        </ButtonGroup>
+        <ContentContainer>
+          <ButtonGroup>
+            <Button onClick={() => handleOpenModal()}>
+              <Plus size={18} />
+              Add Category
+            </Button>
+          </ButtonGroup>
 
-        {isLoading ? (
-          <EmptyState>
-            <h3>Loading...</h3>
-          </EmptyState>
-        ) : categories.length === 0 ? (
-          <EmptyState>
-            <h3>No categories yet</h3>
-            <p>Create your first product category to get started</p>
-          </EmptyState>
-        ) : (
-          <CategoriesTable>
-            <TableHeader>
-              <div>Name</div>
-              <div>Description</div>
-              <div>Status</div>
-              <div>Actions</div>
-            </TableHeader>
+          {isLoading ? (
+            <EmptyState>
+              <h3>Loading...</h3>
+            </EmptyState>
+          ) : categories.length === 0 ? (
+            <EmptyState>
+              <h3>No categories yet</h3>
+              <p>Create your first product category to get started</p>
+            </EmptyState>
+          ) : (
+            <CategoriesTable>
+              <TableHeader>
+                <div>Name</div>
+                <div>Description</div>
+                <div>Status</div>
+                <div>Actions</div>
+              </TableHeader>
 
-            {categories.map((category) => (
-              <TableRow key={category._id}>
-                <CategoryName>{category.displayName}</CategoryName>
-                <CategoryDesc>{category.description || '—'}</CategoryDesc>
-                <StatusBadge active={category.isActive}>
-                  {category.isActive ? 'Active' : 'Inactive'}
-                </StatusBadge>
-                <ActionButtons>
-                  <IconButton 
-                    onClick={() => handleOpenModal(category)}
-                    title="Edit category"
-                  >
-                    <Edit2 size={16} />
-                    <span style={{ display: 'none' }}>Edit</span>
-                  </IconButton>
-                  <IconButton 
-                    danger 
-                    onClick={() => handleDelete(category._id)}
-                    title="Delete category"
-                  >
-                    <Trash2 size={16} />
-                    <span style={{ display: 'none' }}>Delete</span>
-                  </IconButton>
-                </ActionButtons>
-              </TableRow>
-            ))}
-          </CategoriesTable>
-        )}
-      </ContentContainer>
+              {categories.map((category) => (
+                <TableRow key={category._id}>
+                  <CategoryName>{category.displayName}</CategoryName>
+                  <CategoryDesc>{category.description || '—'}</CategoryDesc>
+                  <StatusBadge active={category.isActive}>
+                    {category.isActive ? 'Active' : 'Inactive'}
+                  </StatusBadge>
+                  <ActionButtons>
+                    <IconButton 
+                      onClick={() => handleOpenModal(category)}
+                      title="Edit category"
+                    >
+                      <Edit2 size={16} />
+                      <span style={{ display: 'none' }}>Edit</span>
+                    </IconButton>
+                    <IconButton 
+                      danger 
+                      onClick={() => handleDelete(category._id)}
+                      title="Delete category"
+                    >
+                      <Trash2 size={16} />
+                      <span style={{ display: 'none' }}>Delete</span>
+                    </IconButton>
+                  </ActionButtons>
+                </TableRow>
+              ))}
+            </CategoriesTable>
+          )}
+        </ContentContainer>
 
-      {/* Add/Edit Modal */}
-      <Modal isOpen={isModalOpen}>
-        <ModalContent>
-          <ModalTitle>
-            {editingCategory ? 'Edit Category' : 'Add New Category'}
-          </ModalTitle>
+        {/* Add/Edit Modal */}
+        <Modal isOpen={isModalOpen}>
+          <ModalContent>
+            <ModalTitle>
+              {editingCategory ? 'Edit Category' : 'Add New Category'}
+            </ModalTitle>
 
-          <form onSubmit={handleSubmit}>
-            <FormGroup>
-              <Label htmlFor="displayName">Category Name *</Label>
-              <Input
-                id="displayName"
-                type="text"
-                placeholder="e.g., Electronics"
-                value={formData.displayName}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  displayName: e.target.value
-                }))}
-              />
-            </FormGroup>
+            <form onSubmit={handleSubmit}>
+              <FormGroup>
+                <Label htmlFor="displayName">Category Name *</Label>
+                <Input
+                  id="displayName"
+                  type="text"
+                  placeholder="e.g., Electronics"
+                  value={formData.displayName}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    displayName: e.target.value
+                  }))}
+                />
+              </FormGroup>
 
-            <FormGroup>
-              <Label htmlFor="description">Description</Label>
-              <TextArea
-                id="description"
-                placeholder="Optional category description"
-                value={formData.description}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev,
-                  description: e.target.value
-                }))}
-              />
-            </FormGroup>
+              <FormGroup>
+                <Label htmlFor="description">Description</Label>
+                <TextArea
+                  id="description"
+                  placeholder="Optional category description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    description: e.target.value
+                  }))}
+                />
+              </FormGroup>
 
-            <ModalButtons>
-              <Button
-                type="button"
-                onClick={handleCloseModal}
-                style={{ background: '#e5e7eb', color: '#1f2937' }}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={createCategory.isPending || updateCategory.isPending}
-              >
-                {editingCategory ? 'Update' : 'Create'} Category
-              </Button>
-            </ModalButtons>
-          </form>
-        </ModalContent>
-      </Modal>
-    </PageContainer>
+              <ModalButtons>
+                <Button
+                  type="button"
+                  onClick={handleCloseModal}
+                  style={{ background: '#e5e7eb', color: '#1f2937' }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createCategory.isPending || updateCategory.isPending}
+                >
+                  {editingCategory ? 'Update' : 'Create'} Category
+                </Button>
+              </ModalButtons>
+            </form>
+          </ModalContent>
+        </Modal>
+      </PageContainer>
+  );
+}
+
+// Wrapper component for Suspense boundary
+export default function CategoriesPage() {
+  return (
+    <Suspense fallback={<PageContainer><EmptyState><h3>Loading categories...</h3></EmptyState></PageContainer>}>
+      <CategoriesPageContent />
+    </Suspense>
   );
 }

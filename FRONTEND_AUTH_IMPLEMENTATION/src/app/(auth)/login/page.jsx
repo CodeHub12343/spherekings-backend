@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -163,7 +163,7 @@ const SignUpLink = styled.div`
   }
 `;
 
-export default function LoginPage() {
+function LoginPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
@@ -268,6 +268,7 @@ export default function LoginPage() {
     }
   };
 
+
   return (
     <PageContainer>
       <LeftSection>
@@ -340,10 +341,18 @@ export default function LoginPage() {
           </FooterLinks>
 
           <SignUpLink>
-            Don't have an account? <Link href="/register">Create one</Link>
+            Don&apos;t have an account? <Link href="/register">Create one</Link>
           </SignUpLink>
         </FormContainer>
       </RightSection>
     </PageContainer>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageInner />
+    </Suspense>
   );
 }

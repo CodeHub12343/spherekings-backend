@@ -1,3 +1,6 @@
+'use client';
+export const dynamic = 'force-dynamic';
+
 /**
  * Admin Commission Detail Page
  * /admin/commissions/[commissionId]
@@ -9,8 +12,6 @@
  * - Status history
  * - Admin actions (approve, pay, reverse)
  */
-
-'use client';
 
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';

@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Commission Summary Card Component
  * Displays earnings breakdown and payout threshold

@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Commission Statistics Cards Component
  * Display commission summary statistics

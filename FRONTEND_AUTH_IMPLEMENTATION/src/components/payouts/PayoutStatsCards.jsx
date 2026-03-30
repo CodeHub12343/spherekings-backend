@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * PayoutStatsCards Component
  * Displays payout statistics summary cards

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import styled from "styled-components";
 import { useAuthStore } from "@/stores/authStore";
@@ -186,7 +186,7 @@ const IconLabel = styled.span`
   letter-spacing: 0.5px;
 `;
 
-export default function InfluencerApplyPage() {
+function InfluencerApplyPageInner() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
 
@@ -274,5 +274,13 @@ export default function InfluencerApplyPage() {
         </Container>
       </Section>
     </PageContainer>
+  );
+}
+
+export default function InfluencerApplyPage() {
+  return (
+    <Suspense fallback={null}>
+      <InfluencerApplyPageInner />
+    </Suspense>
   );
 }

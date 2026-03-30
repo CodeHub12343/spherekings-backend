@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Referral Tracker Component
  * Handles referral URL parameter detection and click tracking
@@ -32,6 +34,8 @@ export const ReferralTracker = () => {
 
     // Only track if we have a ref code and haven't already tracked
     if (refCode && !isTracked) {
+      console.log('🔍 [REFERRAL TRACKER] Found ?ref parameter:', refCode);
+      
       // Get UTM parameters if available
       const utmParams = {
         ref: refCode,
@@ -46,10 +50,18 @@ export const ReferralTracker = () => {
         (key) => utmParams[key] === undefined && delete utmParams[key]
       );
 
+      console.log('📝 [REFERRAL TRACKER] Tracking referral with params:', utmParams);
+
       // Track the referral click
-      trackClick(utmParams).catch((error) => {
+      trackClick(utmParams).then(() => {
+        console.log('✅ [REFERRAL TRACKER] Referral tracked successfully, cookie should now be set');
+      }).catch((error) => {
         console.debug('Referral tracking info:', error?.message || 'Tracking failed');
       });
+    } else if (refCode && isTracked) {
+      console.log('ℹ️  [REFERRAL TRACKER] Referral already tracked in this session');
+    } else {
+      console.log('ℹ️  [REFERRAL TRACKER] No ?ref parameter in URL');
     }
   }, [searchParams, isTracked, trackClick]);
 

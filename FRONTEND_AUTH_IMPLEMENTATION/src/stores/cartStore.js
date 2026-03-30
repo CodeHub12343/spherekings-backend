@@ -323,9 +323,20 @@ function calculateCartSummary(items) {
   let subtotal = 0;
   let totalItems = 0;
 
+  // Guard against undefined or null items
+  if (!items || !Array.isArray(items)) {
+    return {
+      itemCount: 0,
+      totalItems: 0,
+      subtotal: 0,
+      tax: 0,
+      total: 0,
+    };
+  }
+
   items.forEach((item) => {
-    subtotal += (item.price || 0) * item.quantity;
-    totalItems += item.quantity;
+    subtotal += (item.price || 0) * (item.quantity || 0);
+    totalItems += item.quantity || 0;
   });
 
   // Calculate tax (assuming 10% tax rate - adjust as needed)
@@ -345,12 +356,12 @@ function calculateCartSummary(items) {
 /**
  * Selectors for common cart queries
  */
-export const selectCartItems = (state) => state.items;
+export const selectCartItems = (state) => state.items || [];
 export const selectCartSummary = (state) => state.summary;
 export const selectCartLoading = (state) => state.loading;
 export const selectCartError = (state) => state.error;
 export const selectValidationIssues = (state) => state.validationIssues;
-export const selectCartIsEmpty = (state) => state.items.length === 0;
+export const selectCartIsEmpty = (state) => !state.items || state.items.length === 0;
 export const selectItemCount = (state) => state.getItemCount();
 export const selectCartTotal = (state) => state.summary.total;
 

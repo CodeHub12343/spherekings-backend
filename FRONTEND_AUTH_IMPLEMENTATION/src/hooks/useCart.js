@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Cart Hooks
  * Custom React hooks for cart operations

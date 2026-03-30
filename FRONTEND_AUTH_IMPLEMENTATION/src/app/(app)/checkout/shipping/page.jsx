@@ -147,7 +147,16 @@ export default function CheckoutShippingPage() {
       console.log('📦 Address keys:', validatedAddress ? Object.keys(validatedAddress) : 'null/undefined');
 
       const affiliateId = getAffiliateId();
-      console.log('🆔 Affiliate ID:', affiliateId);
+      console.log('🆔 [AFFILIATE TRACKING] Affiliate ID retrieved:', {
+        affiliateId: affiliateId || '(none)',
+        status: affiliateId ? '✅ PRESENT' : '❌ NOT FOUND',
+      });
+
+      if (affiliateId) {
+        console.log('✅ Affiliate ID will be attached to checkout session');
+      } else {
+        console.log('ℹ️  No affiliate ID - processing as regular customer');
+      }
 
       // Create checkout session with shipping address
       const sessionData = await checkoutService.createCheckoutSession({
@@ -156,6 +165,7 @@ export default function CheckoutShippingPage() {
       });
 
       console.log('✅ Checkout session created:', sessionData.sessionId);
+      console.log('✅ Affiliate attribution status: ' + (affiliateId ? 'ATTACHED' : 'NONE'));
 
       // Redirect to Stripe checkout
       if (sessionData.url) {

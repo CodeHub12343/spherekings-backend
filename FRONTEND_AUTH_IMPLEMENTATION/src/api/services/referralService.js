@@ -254,19 +254,31 @@ class ReferralTrackingService {
    */
   getReferralCookie() {
     try {
-      if (typeof window === 'undefined') return null;
+      if (typeof window === 'undefined') {
+        console.log('🔗 [REFERRAL SERVICE] Running on server - skipping cookie read');
+        return null;
+      }
 
       // Parse affiliate_ref cookie
       const cookieString = document.cookie
         .split(';')
         .find((c) => c.trim().startsWith('affiliate_ref='));
 
-      if (!cookieString) return null;
+      if (!cookieString) {
+        console.log('🔗 [REFERRAL SERVICE] No affiliate_ref cookie found in document.cookie');
+        return null;
+      }
 
       const cookieValue = cookieString.split('=')[1];
-      return JSON.parse(decodeURIComponent(cookieValue));
+      const parsed = JSON.parse(decodeURIComponent(cookieValue));
+      console.log('✅ [REFERRAL SERVICE] affiliate_ref cookie parsed:', {
+        affiliateId: parsed.affiliateId ? '✓ Present' : '✗ Missing',
+        visitorId: parsed.visitorId ? '✓ Present' : '✗ Missing',
+        data: parsed,
+      });
+      return parsed;
     } catch (error) {
-      console.warn('Error parsing referral cookie:', error);
+      console.warn('❌ [REFERRAL SERVICE] Error parsing referral cookie:', error.message);
       return null;
     }
   }
