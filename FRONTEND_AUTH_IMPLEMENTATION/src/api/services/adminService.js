@@ -15,13 +15,21 @@
 import axios from 'axios';
 import TokenManager from '../../utils/tokenManager';
 
+// Get base URL from environment variable (production) or fallback to localhost
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api/v1';
+
 // Create axios instance with base URL
 const adminClient = axios.create({
-  baseURL: 'http://localhost:5000/api/v1/admin',
+  baseURL: `${API_BASE_URL}/admin`,
   headers: {
     'Content-Type': 'application/json'
   }
 });
+
+// Log the admin API base URL being used (for debugging)
+if (typeof window !== 'undefined') {
+  console.log('🔐 [ADMIN SERVICE] Initialized with base URL:', `${API_BASE_URL}/admin`);
+}
 
 // Request interceptor to add auth token
 adminClient.interceptors.request.use(

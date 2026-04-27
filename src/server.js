@@ -67,6 +67,7 @@ const fileUploadRoutes = require('./routes/fileUploadRoutes');
 const raffleRoutes = require('./routes/raffleRoutes');
 const followerRoutes = require('./routes/followerRoutes');
 const retailLocationRoutes = require('./routes/retailLocationRoutes');
+const couponRoutes = require('./routes/couponRoutes');
 
 // Import webhook handler
 const { verifyWebhookSignature } = require('./webhooks/stripeWebhook');
@@ -95,7 +96,19 @@ app.use(helmet());
 // CORS - Enable cross-origin requests
 app.use(
   cors({
-    origin: config.CORS_ORIGIN || '*',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g., mobile apps or curl requests)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      // Check if origin is in allowed list
+      if (config.CORS_ORIGIN.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('CORS not allowed'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -436,6 +449,9 @@ app.use(`${config.API_PREFIX}/followers`, followerRoutes);
 
 // Retail Location Routes (store locator, retail partnerships, public locations)
 app.use(`${config.API_PREFIX}/retail-locations`, retailLocationRoutes);
+
+// Coupon Routes (admin CRUD + customer validation)
+app.use(`${config.API_PREFIX}/coupons`, couponRoutes);
 
 // Admin Dashboard routes (analytics, monitoring, reporting, commission operations)
 // Apply strict rate limiting for admin endpoints

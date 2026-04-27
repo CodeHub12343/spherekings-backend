@@ -475,8 +475,10 @@ export default function InfluencerApplicationFormPage() {
         return;
       }
 
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+      
       const response = await axios.post(
-        "http://localhost:5000/api/v1/influencer/apply",
+        `${API_URL}/influencer/apply`,
         dataToSend,
         {
           headers: {
@@ -526,7 +528,7 @@ export default function InfluencerApplicationFormPage() {
         errorMessage = error.response.data.message;
         setErrors({ submit: errorMessage });
       } else if (error.message === "Network Error") {
-        setErrors({ submit: "Network error. Make sure the backend server is running on http://localhost:5000" });
+        setErrors({ submit: "Network error. Please check your internet connection and try again." });
       } else {
         setErrors({ submit: errorMessage });
       }

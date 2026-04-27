@@ -19,8 +19,10 @@ const config = {
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key',
   JWT_REFRESH_EXPIRATION: process.env.JWT_REFRESH_EXPIRATION || '30d', // 30 days
 
-  // CORS Configuration
-  CORS_ORIGIN: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  // CORS Configuration - Parse comma-separated origins into array
+  CORS_ORIGIN: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+    : ['http://localhost:3000'],
 
   // Stripe Configuration (for future payment processing)
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,

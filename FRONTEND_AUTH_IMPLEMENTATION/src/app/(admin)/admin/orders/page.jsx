@@ -431,15 +431,22 @@ const OrderNumberLink = styled(Link)`
   }
 `;
 
-const StatusSelect = styled.select`
-  padding: 8px;
+const StatusButton = styled.button`
+  padding: 8px 12px;
   border: 1px solid #d1d5db;
+  background: white;
   border-radius: 4px;
   font-size: 0.75rem;
   color: #111827;
   cursor: pointer;
   min-height: 40px;
   width: 100%;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #2563eb;
+    background: #f0f7ff;
+  }
 
   &:focus {
     outline: none;
@@ -453,6 +460,101 @@ const StatusSelect = styled.select`
   @media (max-width: 480px) {
     font-size: 0.7rem;
     padding: 6px;
+  }
+`;
+
+const StatusUpdateModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: ${(props) => (props.$isOpen ? 'flex' : 'none')};
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 16px;
+`;
+
+const ModalContent = styled.div`
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15);
+`;
+
+const ModalTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 16px 0;
+`;
+
+const ModalSelect = styled.select`
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #0f172a;
+
+  &:focus {
+    outline: none;
+    border-color: #5b4dff;
+    box-shadow: 0 0 0 3px rgba(91, 77, 255, 0.1);
+  }
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+`;
+
+const ActionButton = styled.button`
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-height: 40px;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 480px) {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+`;
+
+const CancelActionButton = styled(ActionButton)`
+  background: #e5e7eb;
+  color: #374151;
+
+  &:hover:not(:disabled) {
+    background: #d1d5db;
+  }
+`;
+
+const UpdateActionButton = styled(ActionButton)`
+  background: #2563eb;
+  color: white;
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
   }
 `;
 
@@ -551,6 +653,19 @@ const orderStatuses = [
 
 const paymentStatuses = ['paid', 'pending', 'failed', 'refunded'];
 
+// Valid status transitions based on current status
+const VALID_STATUS_TRANSITIONS = {
+  pending: ['processing', 'cancelled'],
+  processing: ['confirmed', 'shipped', 'cancelled', 'refunded'],
+  confirmed: ['shipped', 'cancelled', 'refunded'],
+  shipped: ['delivered', 'returned'],
+  delivered: ['returned'],
+  cancelled: [],
+  refunded: [],
+  returned: [],
+  complete: [],
+};
+
 export default function AdminOrdersPage() {
   const {
     orders,
@@ -571,6 +686,10 @@ export default function AdminOrdersPage() {
     paymentStatus: '',
     search: '',
   });
+
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
 
   // Track if initial fetch has been done to prevent infinite loops
   const initialFetchDone = useRef(false);
@@ -624,15 +743,30 @@ export default function AdminOrdersPage() {
     fetchAdminOrders({ page: 1, limit: 20 });
   };
 
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleStatusChange = (order) => {
+    setSelectedOrder(order);
+    setNewStatus('');
+    setShowStatusModal(true);
+  };
+
+  const handleCloseStatusModal = () => {
+    setShowStatusModal(false);
+    setSelectedOrder(null);
+    setNewStatus('');
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!newStatus || !selectedOrder) return;
+
     try {
-      await updateStatus(orderId, newStatus);
+      await updateStatus(selectedOrder._id, newStatus);
       // Refresh orders list
       fetchAdminOrders({
         page: pagination.currentPage,
         limit: pagination.itemsPerPage,
         filters,
       });
+      handleCloseStatusModal();
     } catch (err) {
       console.error('Error updating order status:', err);
     }
@@ -769,17 +903,9 @@ export default function AdminOrdersPage() {
                     </td>
                     <td data-label="Total">{formatPrice(order.total)}</td>
                     <td data-label="Status">
-                      <StatusSelect
-                        value={order.orderStatus}
-                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                        disabled={isUpdating}
-                      >
-                        {orderStatuses.map((status) => (
-                          <option key={status} value={status}>
-                            {status.charAt(0).toUpperCase() + status.slice(1)}
-                          </option>
-                        ))}
-                      </StatusSelect>
+                      <StatusButton onClick={() => handleStatusChange(order)}>
+                        {order.orderStatus.charAt(0).toUpperCase() + order.orderStatus.slice(1)}
+                      </StatusButton>
                     </td>
                     <td data-label="Payment">
                       <PaymentStatusBadge status={order.paymentStatus} />
@@ -841,6 +967,43 @@ export default function AdminOrdersPage() {
           <p>No orders match your current filters</p>
         </EmptyState>
       )}
+
+      {/* Status Update Modal */}
+      <StatusUpdateModal $isOpen={showStatusModal} onClick={handleCloseStatusModal}>
+        <ModalContent onClick={(e) => e.stopPropagation()}>
+          <ModalTitle>Update Order Status</ModalTitle>
+          {selectedOrder && (
+            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '16px' }}>
+              Current Status: <strong>{selectedOrder.orderStatus.charAt(0).toUpperCase() + selectedOrder.orderStatus.slice(1)}</strong>
+            </p>
+          )}
+          <ModalSelect
+            value={newStatus}
+            onChange={(e) => setNewStatus(e.target.value)}
+          >
+            <option value="">Select new status...</option>
+            {selectedOrder && (VALID_STATUS_TRANSITIONS[selectedOrder.orderStatus] || []).map((status) => (
+              <option key={status} value={status}>
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </option>
+            ))}
+          </ModalSelect>
+          <ModalActions>
+            <CancelActionButton
+              onClick={handleCloseStatusModal}
+              disabled={isUpdating}
+            >
+              Cancel
+            </CancelActionButton>
+            <UpdateActionButton
+              onClick={handleUpdateStatus}
+              disabled={!newStatus || isUpdating}
+            >
+              {isUpdating ? 'Updating...' : 'Update Status'}
+            </UpdateActionButton>
+          </ModalActions>
+        </ModalContent>
+      </StatusUpdateModal>
     </PageContainer>
   );
 }

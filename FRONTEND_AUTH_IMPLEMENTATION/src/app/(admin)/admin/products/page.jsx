@@ -805,12 +805,6 @@ export default function AdminProductDashboard() {
                           >
                             <Eye />
                           </Link>
-                          <Link
-                            href={`/admin/products/${product._id}/edit`}
-                            title="Edit product"
-                          >
-                            <Edit2 />
-                          </Link>
                           <button
                             className="delete-btn"
                             onClick={() => handleDelete(product._id)}
@@ -907,15 +901,17 @@ export default function AdminProductDashboard() {
                               View
                             </ActionButton>
                           </Link>
-                          <Link
-                            href={`/admin/products/${product._id}/edit`}
-                            style={{ textDecoration: 'none', flex: 1 }}
+                          <button
+                            onClick={() => handleDelete(product._id)}
+                            style={{ flex: 1, border: 'none', background: 'none', cursor: 'pointer', padding: 0 }}
+                            title="Delete product"
+                            type="button"
                           >
                             <ActionButton as="span" style={{ justifyContent: 'center' }}>
-                              <Edit2 size={14} />
-                              Edit
+                              <Trash2 size={14} />
+                              Delete
                             </ActionButton>
-                          </Link>
+                          </button>
                           <div style={{ position: 'relative' }}>
                             <ActionMenuButton
                               onClick={() => setOpenMenuId(

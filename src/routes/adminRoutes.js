@@ -688,9 +688,69 @@ router.get('/reconciliation', (req, res, next) => {
 
 /**
  * ============================================================================
+ * COUPON MONITORING ENDPOINTS
+ * ============================================================================
+ */
+
+/**
+ * GET /api/admin/coupons/analytics
+ *
+ * @description Get coupon usage analytics and revenue attribution
+ *
+ * @returns {Object}
+ *   {
+ *     coupons: [{code, usageCount, totalRevenue, totalDiscount, ...}],
+ *     summary: {totalCoupons, activeCoupons, totalUsage, totalRevenue, totalDiscount},
+ *     bySalesChannel: [{_id: channel, totalOrders, totalRevenue, totalDiscount}]
+ *   }
+ *
+ * @example
+ *   GET /api/admin/coupons/analytics
+ *
+ *   Response: 200 OK
+ *   {
+ *     "success": true,
+ *     "data": {
+ *       "coupons": [
+ *         { "code": "FB_TRAFFIC", "usageCount": 12, "totalRevenue": 1020 },
+ *         { "code": "INSTA_AD", "usageCount": 2, "totalRevenue": 170 }
+ *       ],
+ *       "summary": { "totalCoupons": 5, "activeCoupons": 3, "totalUsage": 14, ... },
+ *       "bySalesChannel": [
+ *         { "_id": "facebook", "totalOrders": 12, "totalRevenue": 1020 }
+ *       ]
+ *     }
+ *   }
+ */
+router.get('/coupons/analytics', (req, res, next) => {
+  const couponController = require('../controllers/couponController');
+  couponController.getCouponAnalytics(req, res, next);
+});
+
+/**
+ * GET /api/admin/coupons
+ *
+ * @description List all coupons (admin view with all details)
+ *
+ * @query {Number} page - Page number (default: 1)
+ * @query {Number} limit - Results per page (default: 20, max: 100)
+ * @query {Boolean} isActive - Filter by active status
+ * @query {String} salesChannel - Filter by sales channel
+ * @query {String} search - Search by code, description, or channel
+ *
+ * @returns {Array} Array of coupon objects with pagination metadata
+ */
+router.get('/coupons', (req, res, next) => {
+  const couponController = require('../controllers/couponController');
+  couponController.getCoupons(req, res, next);
+});
+
+/**
+ * ============================================================================
  * PAYOUT ACTION ENDPOINTS
  * ============================================================================
  */
+
 
 /**
  * POST /api/admin/payouts/:payoutId/approve

@@ -10,7 +10,8 @@
 import axios from 'axios';
 import { tokenManager } from '@/utils/tokenManager';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api';
+// Use consistent API URL across all services
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
 
 /**
  * Create axios instance with base config
@@ -56,9 +57,9 @@ export const requestPayout = async (payoutData) => {
       notes: payoutData.notes || ''
     };
 
-    console.log('📨 [PAYOUT-SERVICE] POST /v1/payouts/request with:', requestBody);
+    console.log('📨 [PAYOUT-SERVICE] POST /payouts/request with:', requestBody);
     
-    const response = await apiClient.post('/v1/payouts/request', requestBody);
+    const response = await apiClient.post('/payouts/request', requestBody);
 
     console.log('✅ [PAYOUT-SERVICE] Success response:', response.data);
 
@@ -93,7 +94,7 @@ export const getAffiliatePayouts = async (filters = {}) => {
     if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
     if (filters.dateTo) params.append('dateTo', filters.dateTo);
 
-    const response = await apiClient.get(`/v1/payouts?${params.toString()}`);
+    const response = await apiClient.get(`/payouts?${params.toString()}`);
 
     if (!response.data.success) {
       throw new Error(response.data.message || 'Failed to fetch payouts');
@@ -112,7 +113,7 @@ export const getAffiliatePayouts = async (filters = {}) => {
  */
 export const getAffiliatePayoutStats = async () => {
   try {
-    const response = await apiClient.get('/v1/payouts/stats');
+    const response = await apiClient.get('/payouts/stats');
 
     if (!response.data.success) {
       throw new Error(response.data.message || 'Failed to fetch payout stats');
@@ -134,7 +135,7 @@ export const getPayoutDetail = async (payoutId) => {
   try {
     console.log('🔍 [PAYOUT-SERVICE] Fetching payout detail:', { payoutId });
     
-    const response = await apiClient.get(`/v1/payouts/${payoutId}`);
+    const response = await apiClient.get(`/payouts/${payoutId}`);
 
     console.log('✅ [PAYOUT-SERVICE] Payout detail response:', {
       statusCode: response.status,
@@ -190,7 +191,7 @@ export const getAllPayouts = async (filters = {}) => {
     if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
     if (filters.dateTo) params.append('dateTo', filters.dateTo);
 
-    const url = `/v1/admin/payouts?${params.toString()}`;
+    const url = `/admin/payouts?${params.toString()}`;
     console.log('📨 [PAYOUT-SERVICE] Fetching payouts from:', url);
     
     const response = await apiClient.get(url);
@@ -247,7 +248,7 @@ export const getAllPayouts = async (filters = {}) => {
  */
 export const approvePayout = async (payoutId, notes = '') => {
   try {
-    const response = await apiClient.post(`/v1/admin/payouts/${payoutId}/approve`, {
+    const response = await apiClient.post(`/admin/payouts/${payoutId}/approve`, {
       notes
     });
 
@@ -271,7 +272,7 @@ export const approvePayout = async (payoutId, notes = '') => {
  */
 export const processPayout = async (payoutId, receiptId = '', transactionId = '') => {
   try {
-    const response = await apiClient.post(`/v1/admin/payouts/${payoutId}/process`, {
+    const response = await apiClient.post(`/admin/payouts/${payoutId}/process`, {
       receiptId,
       transactionId
     });
@@ -296,7 +297,7 @@ export const processPayout = async (payoutId, receiptId = '', transactionId = ''
  */
 export const rejectPayout = async (payoutId, reason, details = '') => {
   try {
-    const response = await apiClient.post(`/v1/admin/payouts/${payoutId}/reject`, {
+    const response = await apiClient.post(`/admin/payouts/${payoutId}/reject`, {
       reason,
       details
     });
@@ -323,7 +324,7 @@ export const getPendingPayouts = async (options = {}) => {
     const params = new URLSearchParams();
     if (options.limit) params.append('limit', Math.min(options.limit, 500));
 
-    const response = await apiClient.get(`/v1/admin/payouts/pending?${params.toString()}`);
+    const response = await apiClient.get(`/admin/payouts/pending?${params.toString()}`);
 
     if (!response.data.success) {
       throw new Error(response.data.message || 'Failed to fetch pending payouts');
@@ -349,7 +350,7 @@ export const getReadyPayouts = async (filters = {}) => {
     if (filters.page) params.append('page', filters.page);
     if (filters.limit) params.append('limit', filters.limit);
 
-    const response = await apiClient.get(`/v1/admin/payouts/ready?${params.toString()}`);
+    const response = await apiClient.get(`/admin/payouts/ready?${params.toString()}`);
 
     if (!response.data.success) {
       throw new Error(response.data.message || 'Failed to fetch ready payouts');
@@ -376,7 +377,7 @@ export const getSystemPayoutStats = async (options = {}) => {
     if (options.dateTo) params.append('dateTo', options.dateTo);
 
     const queryString = params.toString() ? `?${params.toString()}` : '';
-    const url = `/v1/admin/payouts/stats${queryString}`;
+    const url = `/admin/payouts/stats${queryString}`;
     console.log('📊 [PAYOUT-SERVICE] Fetching system stats from:', url);
     
     const response = await apiClient.get(url);
@@ -439,7 +440,7 @@ export const batchApprovePayout = async (payoutIds, notes = '') => {
       throw new Error('Maximum 500 payouts can be approved at once');
     }
 
-    const response = await apiClient.post('/v1/admin/batch-approve', {
+    const response = await apiClient.post('/admin/batch-approve', {
       payoutIds,
       notes
     });
@@ -471,7 +472,7 @@ export const batchProcessPayout = async (payoutIds, stripeConnectId = '') => {
       throw new Error('Maximum 500 payouts can be processed at once');
     }
 
-    const response = await apiClient.post('/v1/admin/batch-process', {
+    const response = await apiClient.post('/admin/batch-process', {
       payoutIds,
       stripeConnectId
     });

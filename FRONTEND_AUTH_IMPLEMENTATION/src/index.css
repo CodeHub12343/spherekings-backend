@@ -43,9 +43,13 @@
   }
   html {
     scroll-behavior: smooth;
+    /* Reserve space for scrollbar to prevent layout shift */
+    scrollbar-gutter: stable;
   }
   body {
     @apply bg-white text-navy font-sans antialiased;
+    /* Prevent layout shift on scroll lock */
+    transition: overflow 0.3s ease-out;
   }
 }
 

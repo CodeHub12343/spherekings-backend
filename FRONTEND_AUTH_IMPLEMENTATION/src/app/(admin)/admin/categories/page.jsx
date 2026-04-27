@@ -491,6 +491,7 @@ function CategoriesPageContent() {
     try {
       if (editingCategory) {
         await updateCategory.mutateAsync({
+          categoryId: editingCategory._id,
           ...formData,
           name: formData.displayName.toLowerCase().replace(/\s+/g, '-'),
         });
@@ -512,7 +513,7 @@ function CategoriesPageContent() {
     if (!confirm('Are you sure you want to delete this category?')) return;
 
     try {
-      await deleteCategory.mutateAsync();
+      await deleteCategory.mutateAsync(categoryId);
       success('Category deleted successfully!');
     } catch (err) {
       showError(err.message || 'Failed to delete category');

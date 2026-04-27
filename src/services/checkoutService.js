@@ -29,7 +29,7 @@ class CheckoutService {
    * @param {Object} shippingAddress - Shipping address (REQUIRED)
    * @returns {Promise<Object>} { sessionId, url }
    */
-  async createCheckoutSession(userId, cartService, productService, affiliateId = null, visitorId = null, shippingAddress = null) {
+  async createCheckoutSession(userId, cartService, productService, affiliateId = null, visitorId = null, shippingAddress = null, couponData = null) {
     try {
       // Step 0a: Validate shipping address
       console.log('🚚 [CHECKOUT] Validating shipping address...');
@@ -160,6 +160,32 @@ class CheckoutService {
 
       // Step 4: Create Stripe checkout session
       const frontendUrl = process.env.FRONTEND_URL || 'https://spherekings-frontend.vercel.app';
+
+      // If coupon discount is applied, add a negative line item to represent the discount
+      // Stripe doesn't allow negative amounts, so we use Stripe's discount feature
+      // Alternative: Adjust the session total via a Stripe coupon object
+      let stripeCouponId = null;
+      if (couponData && couponData.discountAmount > 0) {
+        try {
+          // Create a one-time Stripe coupon for this session
+          const stripeCoupon = await stripe.coupons.create({
+            amount_off: Math.round(couponData.discountAmount * 100), // Stripe expects cents
+            currency: process.env.CURRENCY || 'usd',
+            duration: 'once',
+            name: `Promo: ${couponData.code}`,
+            metadata: {
+              spherekingsCouponId: couponData.couponId.toString(),
+              spherekingsCouponCode: couponData.code,
+            },
+          });
+          stripeCouponId = stripeCoupon.id;
+          console.log('✅ [CHECKOUT] Stripe coupon created:', stripeCouponId);
+        } catch (stripeCouponError) {
+          console.error('❌ [CHECKOUT] Failed to create Stripe coupon:', stripeCouponError.message);
+          // Fallback: proceed without Stripe discount — the order will still track the coupon
+        }
+      }
+
       const sessionConfig = {
         payment_method_types: ['card'],
         mode: 'payment',
@@ -173,8 +199,22 @@ class CheckoutService {
           ...(affiliateId && { affiliateId: affiliateId.toString() }),
           ...(visitorId && { visitorId: visitorId }),
           shippingAddress: JSON.stringify(validatedShippingAddress), // SHIPPING ADDRESS - stringified for Stripe metadata
+          // COUPON DATA - stringified for Stripe metadata
+          ...(couponData && {
+            couponId: couponData.couponId.toString(),
+            couponCode: couponData.code,
+            couponDiscountType: couponData.discountType,
+            couponDiscountValue: couponData.discountValue.toString(),
+            couponDiscountAmount: couponData.discountAmount.toString(),
+            couponSalesChannel: couponData.salesChannel || '',
+          }),
         },
       };
+
+      // Apply Stripe coupon discount if created
+      if (stripeCouponId) {
+        sessionConfig.discounts = [{ coupon: stripeCouponId }];
+      }
 
       // Optional: Add automatic tax calculation
       if (process.env.STRIPE_TAX_ENABLED === 'true') {
@@ -237,8 +277,15 @@ class CheckoutService {
       const affiliateId = session.metadata?.affiliateId;
       const visitorId = session.metadata?.visitorId;
       const shippingAddressStr = session.metadata?.shippingAddress; // EXTRACT SHIPPING - stringified
+      // EXTRACT COUPON DATA from metadata
+      const couponId = session.metadata?.couponId;
+      const couponCode = session.metadata?.couponCode;
+      const couponDiscountType = session.metadata?.couponDiscountType;
+      const couponDiscountValue = session.metadata?.couponDiscountValue;
+      const couponDiscountAmount = session.metadata?.couponDiscountAmount;
+      const couponSalesChannel = session.metadata?.couponSalesChannel;
 
-      console.log('📋 [CHECKOUT] Extracted metadata:', { stripeSessionId, userId, affiliateId, visitorId, hasShipping: !!shippingAddressStr });
+      console.log('📋 [CHECKOUT] Extracted metadata:', { stripeSessionId, userId, affiliateId, visitorId, hasShipping: !!shippingAddressStr, hasCoupon: !!couponId });
 
       if (!userId) {
         throw new ValidationError('No userId found in Stripe session metadata');
@@ -457,7 +504,21 @@ class CheckoutService {
         console.warn('⚠️  [CHECKOUT] No shipping address found in session metadata');
       }
 
-      // Step 6b: Create order document
+      // Step 6b: Build coupon data for order
+      let orderCouponData = null;
+      if (couponId && couponCode) {
+        orderCouponData = {
+          couponId,
+          code: couponCode,
+          discountType: couponDiscountType || 'flat',
+          discountValue: parseFloat(couponDiscountValue) || 0,
+          discountAmount: parseFloat(couponDiscountAmount) || 0,
+          salesChannel: couponSalesChannel || '',
+        };
+        console.log('🏷️  [CHECKOUT] Coupon data for order:', orderCouponData);
+      }
+
+      // Step 6c: Create order document
       console.log('💾 [CHECKOUT] Creating order in database...');
       const order = await Order.createFromCheckout(
         userId,
@@ -468,7 +529,8 @@ class CheckoutService {
           chargeId,
         },
         affiliateId || null,
-        shippingAddress // PASS SHIPPING ADDRESS to order creation
+        shippingAddress, // PASS SHIPPING ADDRESS to order creation
+        orderCouponData // PASS COUPON DATA to order creation
       );
 
       console.log('✅ [CHECKOUT] Order created successfully:', {
@@ -497,6 +559,19 @@ class CheckoutService {
         } catch (commissionError) {
           console.error(`❌ [CHECKOUT] Error triggering affiliate commission for order ${order._id}:`, commissionError.message);
           // Don't fail the operation if commission trigger fails
+        }
+      }
+
+      // Step 9: Increment coupon usage (ONLY after successful payment and order creation)
+      if (orderCouponData && orderCouponData.couponId) {
+        try {
+          console.log('📈 [CHECKOUT] Incrementing coupon usage...');
+          const couponService = require('./couponService');
+          await couponService.incrementUsage(orderCouponData.couponId);
+          console.log('✅ [CHECKOUT] Coupon usage incremented for:', orderCouponData.code);
+        } catch (couponError) {
+          console.error(`❌ [CHECKOUT] Error incrementing coupon usage for order ${order._id}:`, couponError.message);
+          // Don't fail the operation if coupon increment fails
         }
       }
 

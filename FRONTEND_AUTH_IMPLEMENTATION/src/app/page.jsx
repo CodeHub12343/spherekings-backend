@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react';
 import Header from '../sections/Header';
+import PromoAnnouncementBar from '../sections/PromoAnnouncementBar';
 import Hero from '../sections/Hero';
 import ValueProp from '../sections/ValueProp';
 import HowItWorks from '../sections/HowItWorks';
@@ -22,6 +23,11 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       <Header />
+      <PromoAnnouncementBar 
+        ctaUrl="/register" 
+        showCounter={false}
+        isVisible={true}
+      />
       <main>
         <Hero />
         <ValueProp />

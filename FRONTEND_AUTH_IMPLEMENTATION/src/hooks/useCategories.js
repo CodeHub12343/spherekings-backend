@@ -99,11 +99,11 @@ export const useCreateCategory = (options = {}) => {
 /**
  * Hook: Update category (Admin only)
  */
-export const useUpdateCategory = (categoryId, options = {}) => {
+export const useUpdateCategory = (options = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data) => {
+    mutationFn: async ({ categoryId, ...data }) => {
       try {
         console.log('✏️ Updating category:', data.displayName);
         const response = await client.put(CATEGORY_ENDPOINTS.UPDATE(categoryId), data);
@@ -120,7 +120,7 @@ export const useUpdateCategory = (categoryId, options = {}) => {
         queryKey: ['categories'],
       });
       queryClient.invalidateQueries({
-        queryKey: ['categories', categoryId],
+        queryKey: ['categories', updatedCategory._id],
       });
       options.onSuccess?.(updatedCategory);
     },
@@ -133,11 +133,11 @@ export const useUpdateCategory = (categoryId, options = {}) => {
 /**
  * Hook: Delete category (Admin only)
  */
-export const useDeleteCategory = (categoryId, options = {}) => {
+export const useDeleteCategory = (options = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (categoryId) => {
       try {
         console.log('🗑️ Deleting category:', categoryId);
         await client.delete(CATEGORY_ENDPOINTS.DELETE(categoryId));

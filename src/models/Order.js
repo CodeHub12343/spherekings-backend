@@ -135,6 +135,38 @@ const AffiliateDetailsSchema = new mongoose.Schema(
 );
 
 /**
+ * Coupon Details Schema - Tracks which coupon/promo code was applied
+ */
+const CouponDetailsSchema = new mongoose.Schema(
+  {
+    couponId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Coupon',
+    },
+    code: {
+      type: String,
+    },
+    discountType: {
+      type: String,
+      enum: ['percentage', 'flat'],
+    },
+    discountValue: {
+      type: Number, // The configured value (e.g., 15 for 15%)
+      min: 0,
+    },
+    discountAmount: {
+      type: Number, // The actual $ discount applied to this order
+      min: 0,
+    },
+    salesChannel: {
+      type: String, // e.g., 'facebook', 'instagram', 'influencer'
+      default: '',
+    },
+  },
+  { _id: false }
+);
+
+/**
  * Main Order Schema
  */
 const OrderSchema = new mongoose.Schema(
@@ -215,6 +247,7 @@ const OrderSchema = new mongoose.Schema(
     },
     paymentDetails: PaymentDetailsSchema,
     affiliateDetails: AffiliateDetailsSchema,
+    couponDetails: CouponDetailsSchema,
     shippingAddress: {
       firstName: String,
       lastName: String,
@@ -243,6 +276,7 @@ const OrderSchema = new mongoose.Schema(
       { orderStatus: 1 }, // Filter by order status
       { 'paymentDetails.stripeSessionId': 1 }, // Webhook lookup
       { 'affiliateDetails.affiliateId': 1 }, // Affiliate lookup
+      { 'couponDetails.couponId': 1 }, // Coupon analytics lookup
       { createdAt: -1 }, // Recent orders
     ],
   }
@@ -385,7 +419,8 @@ OrderSchema.statics.createFromCheckout = async function (
   cartItems,
   stripeData,
   affiliateId = null,
-  shippingAddress = null // SHIPPING ADDRESS PARAMETER - NEW
+  shippingAddress = null, // SHIPPING ADDRESS PARAMETER
+  couponData = null // COUPON DATA PARAMETER - NEW
 ) {
   console.log('📝 [ORDER.CREATE] Starting order creation from checkout...');
 
@@ -394,9 +429,10 @@ OrderSchema.statics.createFromCheckout = async function (
     const taxRate = parseFloat(process.env.TAX_RATE || 0.08);
     const subtotal = cartItems.reduce((sum, item) => sum + item.subtotal, 0);
     const tax = Math.round(subtotal * taxRate * 100) / 100;
-    const total = subtotal + tax;
+    const couponDiscount = (couponData && couponData.discountAmount) ? couponData.discountAmount : 0;
+    const total = subtotal + tax - couponDiscount;
 
-    console.log('💰 [ORDER.CREATE] Calculated totals:', { subtotal, tax, total, taxRate });
+    console.log('💰 [ORDER.CREATE] Calculated totals:', { subtotal, tax, couponDiscount, total, taxRate });
 
     // Create order
     const order = new this({
@@ -413,6 +449,7 @@ OrderSchema.statics.createFromCheckout = async function (
       subtotal,
       tax,
       taxRate,
+      discount: couponDiscount,
       total,
       paymentStatus: 'paid',
       orderStatus: 'processing',
@@ -472,6 +509,23 @@ OrderSchema.statics.createFromCheckout = async function (
         recordedAt: new Date(),
       };
       console.log('🤝 [ORDER.CREATE] Affiliate details added:', { affiliateId, affiliateCode, commissionRate });
+    }
+
+    // Add coupon details if applicable
+    if (couponData && couponData.couponId) {
+      order.couponDetails = {
+        couponId: couponData.couponId,
+        code: couponData.code,
+        discountType: couponData.discountType,
+        discountValue: couponData.discountValue,
+        discountAmount: couponData.discountAmount,
+        salesChannel: couponData.salesChannel || '',
+      };
+      console.log('🏷️  [ORDER.CREATE] Coupon details added:', {
+        code: couponData.code,
+        discountAmount: couponData.discountAmount,
+        salesChannel: couponData.salesChannel,
+      });
     }
 
     // Generate order number

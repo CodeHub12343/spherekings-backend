@@ -1,8 +1,6 @@
 'use client';
 
-'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -462,9 +460,14 @@ const CollapsibleSectionHeader = styled.button`
 
 const CollapsibleSectionContent = styled.div`
   display: ${props => (props.isOpen ? 'block' : 'none')};
-  max-height: ${props => (props.isOpen ? '500px' : '0')};
-  overflow: hidden;
+  max-height: ${props => (props.isOpen ? 'none' : '0')};
+  overflow-y: ${props => (props.isOpen ? 'auto' : 'hidden')};
   transition: max-height 0.3s ease;
+  
+  /* Allow internal scrolling for long lists */
+  @media (max-width: 640px) {
+    max-height: ${props => (props.isOpen ? 'calc(100vh - 300px)' : '0')};
+  }
 `;
 
 const CollapsibleNavLink = styled(Link)`
@@ -513,6 +516,20 @@ export default function Header() {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [expandedMobileSection, setExpandedMobileSection] = useState(null);
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+
+    // Cleanup function to restore scroll on unmount
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isMobileMenuOpen]);
+
   // Hide header on auth routes
   const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
@@ -530,12 +547,21 @@ export default function Header() {
   // Handle logout
   const handleLogout = async () => {
     try {
-      await logout();
       setIsUserDropdownOpen(false);
       setIsMobileMenuOpen(false);
-      router.push('/login');
+      setExpandedMobileSection(null);
+      
+      await logout();
+      
+      // Use replace to prevent back button issues and ensure redirect happens
+      // Add small delay to ensure auth state is fully cleared
+      setTimeout(() => {
+        router.replace('/login');
+      }, 100);
     } catch (error) {
       console.error('Logout failed:', error);
+      // Still redirect even if logout fails
+      router.replace('/login');
     }
   };
 
@@ -780,8 +806,6 @@ export default function Header() {
                   onClick={(e) => {
                     e.preventDefault();
                     handleLogout();
-                    setIsMobileMenuOpen(false);
-                    setExpandedMobileSection(null);
                   }}
                   style={{ color: '#dc2626' }}
                 >

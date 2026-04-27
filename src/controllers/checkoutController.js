@@ -7,6 +7,7 @@ const checkoutService = require('../services/checkoutService');
 const cartService = require('../services/cartService');
 const productService = require('../services/productService');
 const referralTrackingService = require('../services/referralTrackingService');
+const couponService = require('../services/couponService');
 const { ValidationError } = require('../utils/errors');
 
 class CheckoutController {
@@ -98,14 +99,66 @@ class CheckoutController {
 
       console.log('📦 [CHECKOUT] Shipping address received - will be validated in service');
 
-      // Create checkout session (pass shipping address to service)
+      // Extract coupon code from request body (optional)
+      const couponCode = req.body.couponCode || null;
+      let couponData = null;
+
+      if (couponCode) {
+        console.log('🏷️  [CHECKOUT] Coupon code received:', couponCode);
+
+        // Re-validate the coupon at checkout time (prevents stale validation)
+        // We need the cart subtotal — fetch the cart first
+        try {
+          const cart = await cartService.getCart(userId);
+          const cartSubtotal = cart?.summary?.subtotal || 0;
+
+          if (cartSubtotal > 0) {
+            const couponResult = await couponService.validateAndApplyCoupon(
+              couponCode,
+              cartSubtotal,
+              userId
+            );
+
+            if (couponResult.valid) {
+              couponData = {
+                couponId: couponResult.couponId,
+                code: couponResult.code,
+                discountType: couponResult.discountType,
+                discountValue: couponResult.discountValue,
+                discountAmount: couponResult.discountAmount,
+                salesChannel: couponResult.salesChannel || '',
+              };
+              console.log('✅ [CHECKOUT] Coupon validated:', couponData);
+            } else {
+              console.warn('⚠️  [CHECKOUT] Coupon invalid at checkout:', couponResult.reason);
+              return res.status(400).json({
+                success: false,
+                statusCode: 400,
+                message: `Coupon error: ${couponResult.reason}`,
+                errors: { couponCode: couponResult.reason },
+              });
+            }
+          }
+        } catch (couponError) {
+          console.error('❌ [CHECKOUT] Coupon validation error:', couponError.message);
+          return res.status(400).json({
+            success: false,
+            statusCode: 400,
+            message: `Coupon validation failed: ${couponError.message}`,
+            errors: { couponCode: couponError.message },
+          });
+        }
+      }
+
+      // Create checkout session (pass shipping address and coupon data to service)
       const sessionData = await checkoutService.createCheckoutSession(
         userId,
         cartService,
         productService,
         affiliateId,
         visitorId,
-        shippingAddress // PASS SHIPPING ADDRESS
+        shippingAddress,
+        couponData // PASS COUPON DATA
       );
 
       // Return successful response

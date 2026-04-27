@@ -647,7 +647,7 @@ export default function InfluencerDashboardPage() {
       console.log('📤 Submitting content link for app:', appId);
 
       const response = await axios.put(
-        `http://localhost:5000/api/v1/influencer/${appId}/add-content`,
+        `${API_BASE_URL}/api/v1/influencer/${appId}/add-content`,
         {
           url: cleanUrl,
           platform: contentFormData.platform,
